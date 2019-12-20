@@ -1,12 +1,13 @@
-// Authors: Marcus Östling, Tomas Möre 2019
+// Authors: Marcus Östling, (& Tomas Möre, parts is from the course popup 2019)
 #pragma once
 #include <cmath>
 #include <complex>
 #include <valarray>
 #include <algorithm>
 #include <cstdio>
+#include <vector>
 
-namespace popup {
+namespace imnln {
 
     /**
      *  Class that stores the coeffients of a polynomial and using
@@ -18,7 +19,7 @@ namespace popup {
         T* coeffs_;
         size_t size_;
 
-        /** 
+        /**
          *  Internal Descrete Fourier Transform, solved by dividing and conquer.
          *  arr: valarray of complex coeffients.
          *  omegas: Complex point used for transformation. (Performance reason)
@@ -42,6 +43,13 @@ namespace popup {
         explicit Polynomial(size_t size) {
             coeffs_ = new T[size];
             size_ = size;
+        }
+
+        explicit Polynomial(std::vector<T> v) {
+            coeffs_ = new T[v.size()];
+            size_ = v.size();
+            for (size_t i = 0; i < v.size(); i++) 
+                coeffs_[i] = v[i];
         }
 
         Polynomial(Polynomial<T> &&p) {
@@ -70,7 +78,8 @@ namespace popup {
          *  Multiplies this polynomial with another, returns a new polynomial.
          */
         Polynomial<T> polymul(const Polynomial<T> &other) const {
-            size_t size = std::pow(2, std::ceil(std::log2(std::max(size_, other.size()))) + 1);
+            size_t size = (size_t)std::pow(2,
+                    std::ceil(std::log2(std::max(size_, other.size()))) + 1);
 
             const std::complex<T> c = 0;
             std::valarray<std::complex<T>> p1(c, size);
@@ -109,4 +118,42 @@ namespace popup {
             return p;
         }
     };
-} // namespace popup
+
+    /**
+     * Given two intergers (as string) multiply them
+     * using Schönhage-Strassen
+     */
+    std::string SSA(std::string istr1, std::string istr2) {
+        Polynomial<double> p1(imnln::split<double>(istr1));
+        Polynomial<double> p2(imnln::split<double>(istr2));
+        auto pr = p1.polymul(p2);
+
+        // trim 0 coeffients at beginning
+        size_t pr_len = pr.size();
+        while(pr_len > 0 && std::round(pr[pr_len]) == 0) {
+            pr_len--;
+        }
+
+        // perform carrying
+        uint64_t mod = std::pow(10, imnln::CHUCK_SIZE);
+        for (size_t i = pr_len; i > 0 && i < ULLONG_MAX; i--) {
+            uint64_t v = (uint64_t)std::round(pr[i]);
+            pr[i-1] += v / mod; // carry
+            pr[i] = v % mod;    // rest
+        }
+
+        // Build result string
+        std::string result_str = "";
+        for (size_t i = 0; i <= pr_len; i++) {
+            uint64_t v = (uint64_t)std::round(pr[i]);
+            std::string prs = std::to_string(v);
+            if (i != 0)
+                prs = std::string(imnln::CHUCK_SIZE - prs.length(), '0') + prs;
+            result_str += prs;
+        }
+
+        return result_str;
+
+    }
+
+} // namespace imnln
