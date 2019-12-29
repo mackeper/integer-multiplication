@@ -23,5 +23,5 @@ paper, convert back into one integer.
 ###  Run algorithms and compare (week 4)
 Run both algorithms on the same inputs, up to large integer (size will be
 decided during week 51), and measure their run-times.
-### Run algorithms and compare (week 5-6)
+### Write report (week 5-6)
 All results should be done and I will write a complete report for the project.
