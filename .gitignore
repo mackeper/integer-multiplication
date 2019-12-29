@@ -34,3 +34,6 @@
 
 # Editor
 *~
+
+# text files
+*.txt

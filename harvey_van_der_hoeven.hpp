@@ -14,10 +14,10 @@ namespace imnln {
 
     /**
      *  Class that stores the coeffients of a polynomial and using
-     *  FFT can be multiplied with another Polynomial.
+     *  FFT can be multiplied with another HVDHPolynomial.
      */
     template <class T>
-    class Polynomial {
+    class HVDHPolynomial {
 
         T* coeffs_;
         size_t size_;
@@ -46,15 +46,15 @@ namespace imnln {
         }
 
         public:
-        Polynomial() {}
+        HVDHPolynomial() {}
 
-        explicit Polynomial(size_t size) {
+        explicit HVDHPolynomial(size_t size) {
             coeffs_ = new T[size];
             size_ = size;
             deleted = false;
         }
 
-        explicit Polynomial(std::vector<T> &v) {
+        explicit HVDHPolynomial(std::vector<T> &v) {
             coeffs_ = new T[v.size()];
             size_ = v.size();
             for (size_t i = 0; i < v.size(); i++) {
@@ -63,14 +63,14 @@ namespace imnln {
             deleted = false;
         }
 
-        Polynomial(Polynomial<T> &&p) {
+        HVDHPolynomial(HVDHPolynomial<T> &&p) {
             this->size_ = p.size_;
             this->coeffs_ = p.coeffs_;
             p.coeffs_ = nullptr;
             deleted = false;
         }
 
-        ~Polynomial() {
+        ~HVDHPolynomial() {
             if (!deleted) {
                 delete[] coeffs_;
                 size_ = 0;
@@ -117,7 +117,7 @@ namespace imnln {
          *
          *  cannot be const as I need to erase coeffs_
          */
-        Polynomial<T> polymul(Polynomial<T> &other) {
+        HVDHPolynomial<T> polymul(HVDHPolynomial<T> &other) {
             size_t size = (size_t)std::pow(2,
                     std::ceil(std::log2(std::max(size_, other.size()))) + 1);
 
@@ -169,7 +169,7 @@ namespace imnln {
             DFT(p1, omegas);
 
             imnln::printd("result polynomial");
-            Polynomial p(size);
+            HVDHPolynomial p(size);
             imnln::print_ram_info();
             for(size_t i = 0; i < size; i++) {
                 p[i] = p1[i].real()/(T)size;
@@ -182,10 +182,10 @@ namespace imnln {
      * Given two intergers (as string) multiply them
      * using Schönhage-Strassen
      */
-    int SSA(std::string fname1, std::string fname2, std::string fout) {
+    int HVDH(std::string fname1, std::string fname2, std::string fout) {
 
         // Get first polynomial
-        Polynomial<poly_type> p1;
+        HVDHPolynomial<poly_type> p1;
         {
             std::vector<poly_type> v1;
             {
@@ -198,7 +198,7 @@ namespace imnln {
         }
 
         // Get second polynomial
-        Polynomial<poly_type> p2;
+        HVDHPolynomial<poly_type> p2;
         {
             std::vector<poly_type> v2;
             {
