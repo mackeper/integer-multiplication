@@ -6,6 +6,7 @@
 #include <vector>
 #include <cmath>
 #include <climits>
+#include <bitset>
 
 #include "parameters.hpp"
 
@@ -14,7 +15,7 @@
 #include "sys/sysinfo.h"
 #include <iomanip>
 
-#define DEBUG 0
+#define DEBUG 1
 
 namespace imnln {
     auto start = std::chrono::high_resolution_clock::now();
@@ -170,6 +171,51 @@ namespace imnln {
             std::cout << "Used ram: " << virtualMemUsed << " G" << std::endl;
         }
 
+    }
+
+    // Non-square matrix transpose of matrix of size r x c and base address A 
+    // https://www.geeksforgeeks.org/inplace-m-x-n-size-matrix-transpose/
+    template <class T>
+    void transpose(std::vector<T> &v, int r, int c) { 
+        int size = r*c - 1; 
+        int t; // holds element to be replaced, eventually becomes next element to move 
+        int next; // location of 't' to be moved 
+        int cycleBegin; // holds start of cycle 
+        int i; // iterator 
+        // hash to mark moved elements 
+        std::vector<bool> b(v.size());
+        b[0] = b[size] = 1; 
+        i = 1; // Note that A[0] and A[size-1] won't move 
+        while (i < size) { 
+            cycleBegin = i; 
+            t = v[i]; 
+            do { 
+                // Input matrix [r x c] 
+                // Output matrix  
+                // i_new = (i*r)%(N-1) 
+                next = (i*r)%size; 
+                std::swap(v[next], t); 
+                b[i] = 1; 
+                i = next; 
+            } 
+            while (i != cycleBegin); 
+      
+            // Get Next Move (what about querying random location?) 
+            for (i = 1; i < size && b[i]; i++) 
+                ; 
+        } 
+    }
+
+    // https://www.geeksforgeeks.org/multiplicative-inverse-under-modulo-m/
+    // Inverse of a modulo m
+    uint64_t modInverse(uint64_t a, uint64_t m) { 
+        a = a%m; 
+        for (uint64_t x = 1; x<m; x++) { 
+           if ((a*x) % m == 1) {
+              return x; 
+           }
+        }
+        return 0;
     }
 
 }

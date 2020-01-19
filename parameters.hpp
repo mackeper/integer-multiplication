@@ -2,6 +2,7 @@
 #define INTEGER_MULTIPLICATION_CONSTANTS
 
 #include <cstdint>
+#include <vector>
 #include <string>
 
 namespace imnln {
@@ -14,6 +15,20 @@ namespace imnln {
     const std::string SSA_OUT_FILE = "ssa_result.txt";
     const std::string HVDH_OUT_FILE = "hvdh_result.txt";
     const std::string GMP_OUT_FILE = "gmp_result.txt";
+
+    struct parameters {
+        uint64_t d; // dimension
+        uint64_t n; // size of integers
+        uint64_t b; // chuck size
+        uint64_t p; // precision
+        uint64_t alpha;
+        uint64_t gamma;
+        uint64_t T;
+        uint64_t r;
+        uint64_t S;
+        std::vector<uint64_t> t;
+        std::vector<uint64_t> s;
+    } params;
 }
 
 #endif // INTEGER_MULTIPLICATION_CONSTANTS

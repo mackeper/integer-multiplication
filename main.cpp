@@ -22,7 +22,6 @@
 #include "harvey_van_der_hoeven.hpp"
 
 bool no_gmp = false;
-
 int parse_args(int argc, char **argv) {
     char c;
     while ((c = (char)getopt(argc, argv, "ng:")) != -1)
@@ -104,7 +103,7 @@ int run_gmp(std::string is1,
     delete tmp;
 
     assert(imnln::compare_integer(fgmp, fssa));
-    assert(imnln::compare_integer(fgmp, fhvdh));
+    // assert(imnln::compare_integer(fgmp, fhvdh));
     imnln::printd("run_gmp end");
     return 0;
 }
@@ -149,7 +148,7 @@ int get_parameters(std::string fname1, std::string fname2) {
 
     // Select parameters
     uint64_t d = 4;
-    uint64_t n = std::max(is1.size(), is2.size()); // size of integers
+    uint64_t n = 4*std::max(is1.size(), is2.size()); // size of integers
     uint64_t b = (uint64_t)std::ceil(std::log2(n)); // chuck size
     uint64_t p = 6*b; // precision
     // uint64_t a = (uint64_t)std::ceil(std::pow(12*d*d*b, 1/4)); // alpha
@@ -175,7 +174,19 @@ int get_parameters(std::string fname1, std::string fname2) {
     std::vector<double> o(d); // omegas
     for (uint64_t i = 0; i < o.size(); i++) {
         o[i] = (double)t[i] / (double)s[i]- 1;
+        assert(o[i] >= (double)p/std::pow((double)a, (double)4)); // p.36 in paper
     }
+
+    // Set params struct
+    imnln::params.d = d;
+    imnln::params.n = n;
+    imnln::params.p = p;
+    imnln::params.alpha = a;
+    imnln::params.gamma = g;
+    imnln::params.T = T;
+    imnln::params.S = S;
+    imnln::params.s = s;
+    imnln::params.t = t;
 
     printf("Parameters:\n"
             "\td = %" PRIu64 "\n"
@@ -213,9 +224,9 @@ int main (int argc, char **argv) {
     printf("Run multiplications:\n");
 
     // Run SSA-ish
-    imnln::timer_start();
-    int ssa_res = imnln::SSA(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2, imnln::SSA_OUT_FILE);
-    imnln::timer_stop("ssa:\t");
+    // imnln::timer_start();
+    // int ssa_res = imnln::SSA(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2, imnln::SSA_OUT_FILE);
+    // imnln::timer_stop("ssa:\t");
     
     imnln::print_ram_info();
 
@@ -227,15 +238,15 @@ int main (int argc, char **argv) {
     imnln::print_ram_info();
 
     // Compare to gmp (this need lots of ram!)
-    if (!no_gmp) {
-        imnln::timer_start();
-        run_gmp(imnln::INTEGER_FILE_1, 
-                imnln::INTEGER_FILE_2,
-                imnln::GMP_OUT_FILE,
-                imnln::SSA_OUT_FILE,
-                imnln::HVDH_OUT_FILE);
-        imnln::timer_stop("gmp:\t");
-    }
+    // if (!no_gmp) {
+    //     imnln::timer_start();
+    //     run_gmp(imnln::INTEGER_FILE_1,
+    //             imnln::INTEGER_FILE_2,
+    //             imnln::GMP_OUT_FILE,
+    //             imnln::SSA_OUT_FILE,
+    //             imnln::HVDH_OUT_FILE);
+    //     imnln::timer_stop("gmp:\t");
+    // }
 
     return 0;
 }
