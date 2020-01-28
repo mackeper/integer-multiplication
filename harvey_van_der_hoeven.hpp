@@ -290,26 +290,36 @@ namespace imnln {
     std::vector<complex_type> gaussian_resampling_S(const std::vector<complex_type> &u,
             size_t s, size_t t, size_t a, size_t p) {
         size_t m = (size_t)std::ceil(std::sqrt((poly_type)p)) * a; 
+        m = 10;
         std::vector<complex_type> tv(t, 0);
+        std::vector<std::vector<double>> mat(t, std::vector<double>(s, 0.0));
 
         for (size_t k = 0; k < t; k++) {
             // |j - (sk)/t| < m -> (-m + s*k/t, m + s*k/t) 
-            poly_type jstart = -(poly_type)m+((poly_type)s*(poly_type)k)/(poly_type)t + 1;
-            poly_type jend   =  (poly_type)m+((poly_type)s*(poly_type)k)/(poly_type)t;
-
-            for (poly_type j = jstart; j < jend; j++) {
-                complex_type b = ((poly_type)1/(poly_type)2) * ((poly_type)1/(poly_type)a);
-
+            int jstart = std::ceil(-(poly_type)m+((poly_type)s*(poly_type)k)/(poly_type)t);
+            int jend   = std::floor((poly_type)m+((poly_type)s*(poly_type)k)/(poly_type)t);
+            for (int j = jstart; j <= jend; j++) {
+                // complex_type b = ((poly_type)1/(poly_type)2) * ((poly_type)1/(poly_type)a);
+                complex_type b = ((poly_type)1/(poly_type)a);
                 complex_type x = -M_PI * std::pow((poly_type)a, -2);
-                x *= std::pow((poly_type)j - ((poly_type)s * (poly_type)k)/(poly_type)t, 2);
+                x *= std::pow((poly_type)(j - ((poly_type)s * (poly_type)k)/(poly_type)t), 2);
                 x = std::exp(x);
 
                 complex_type y =  b * x;
+                mat[k][((size_t)(j+s*m)) % s] += std::real(y);
 
-                complex_type z = y * u[(size_t)(j + s) % s];
+                complex_type z = y * u[((size_t)(j+s*m)) % s];
                 tv[k] += z;
             }
         }
+
+        // std::cout << std::scientific;
+        // std::cout << std::setprecision(4);
+        // for (auto outer : mat) {
+        //     for (auto inner : outer)
+        //         std::cout << inner << " ";
+        //     std::cout << std::endl;
+        // }
         return tv;
     }
 
@@ -359,6 +369,7 @@ namespace imnln {
                     std::round(((poly_type)t*(poly_type)l)/(poly_type)s);
             };
             
+            std::vector<std::vector<double>> mat(s, std::vector<double>(s, 0.0));
             poly_type m = std::ceil(std::sqrt(p)/(2*a));
             std::vector<complex_type> epssv(s, 0);
             for (size_t l = 0; l < s; l++) {
@@ -370,11 +381,20 @@ namespace imnln {
                     x *= (std::pow((poly_type)t*h/(poly_type)s + beta(l), 2) -
                             std::pow(beta((size_t)(l+h+s) % s), 2));
                     x = std::exp(x);
+                    mat[l][((size_t)(l+h+s*m)) % s] += std::real(x);
 
-                    complex_type z = x * u[(size_t)(l+h+s) % s];
+                    complex_type z = x * u[((size_t)(l+h+s*m)) % s];
                     epssv[l] += z;
                 }
             }
+            // std::cout << std::scientific;
+            // std::cout << std::setprecision(4);
+            // for (auto outer : mat) {
+            //     for (auto inner : outer)
+            //         std::cout << inner << " ";
+            //     std::cout << std::endl;
+            // }
+            // std::cout << "\n";
             return epssv;
         };
 
@@ -445,6 +465,19 @@ namespace imnln {
         return pssv;
     }
 
+    std::vector<complex_type> gaussian_resampling_B(const std::vector<complex_type> &u,
+            size_t s, size_t t, size_t a, size_t p) {
+        imnln::printd("Start gaussian resampling inv");
+        std::vector<complex_type> ub(u);
+        ub = gaussian_resampling_Pt(ub, s, t);
+        ub = gaussian_resampling_C(ub, s, t);
+        ub = gaussian_resampling_I(ub, s, t, a, p);
+        ub = gaussian_resampling_D(ub, s, t, a);
+        ub = gaussian_resampling_Psinv(ub, s, t);
+        imnln::printd("End gaussian resampling inv");
+        return ub;
+    }
+
     int gaussian_resampling(HVDHPolynomial<poly_type> &pv) {
         std::cout << std::setprecision(5);
         std::cout << std::fixed;
@@ -454,13 +487,14 @@ namespace imnln {
         // poly_type s = (poly_type)imnln::params.s.size();
         // poly_type t = (poly_type)imnln::params.t.size();
         
-        size_t s = 3;
-        size_t t = 4;
-        size_t a = 1;
-        size_t p = 1;
+        size_t s = 10;
+        size_t t = 13;
+        size_t a = 2;
+        size_t p = 10;
+        assert((poly_type)t/(poly_type)s - 1.0 > 1.0/((poly_type)a*(poly_type) a));
 
         // std::vector<poly_type> rsv = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-        std::vector<poly_type> rsv = {1, 1, 1};
+        std::vector<poly_type> rsv = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
         for (auto &i : rsv) {
             std::cout << i << std::endl;
@@ -505,49 +539,13 @@ namespace imnln {
         //     std::cout << tvdft[i] << std::endl;
         // }
 
-        imnln::printd("Start gaussian resampling inv");
-        // Pt
-        std::vector<complex_type> ptv = gaussian_resampling_Pt(tv, s, t);
-        for (auto &i : ptv) {
-            std::cout << i << std::endl;
-        }
-        std::cout << std::endl;
-
-        //C
-        std::vector<complex_type> csv = gaussian_resampling_C(ptv, s, t);
-        for (auto &i : csv) {
-            std::cout << i << std::endl;
-        }
-        std::cout << std::endl;
-
-        // I'
-        auto isv = gaussian_resampling_I(csv, s, t, a, p);
-        for (auto &i : isv) {
-            std::cout << i << std::endl;
-        }
-        std::cout << std::endl;
-
-        // D'
-        auto dsv = gaussian_resampling_D(isv, s, t, a);
-        for (auto &i : dsv) {
-            std::cout << i << std::endl;
-        }
-        std::cout << std::endl;
-
-        // Ps-1
-        auto pssv = gaussian_resampling_Psinv(dsv, s, t);
-        auto complex_cmp = [](const complex_type &t1, const complex_type &t2) {
-            return std::real(t1) < std::real(t2);
-        };
-        // std::sort(pssv.begin(), pssv.end(), complex_cmp);
+        auto pssv = gaussian_resampling_B(tv, s, t, a, p);
         for (size_t i = 0; i < s; i++) {
-            std::cout << std::round(std::real((pssv[i]*(complex_type)std::pow(2, 2*a*a)))) << "   ";
-            std::cout << sv[i] << "    ";
-            std::cout << (pssv[i]*(complex_type)std::pow(2, 2*a*a))/sv[i] << std::endl;
+            std::cout << std::real((pssv[i]*(complex_type)std::pow(2, 2*a*a)))*2 << "   ";
+            std::cout << std::real(sv[i]) << "    ";
+            std::cout << std::real((pssv[i]*(complex_type)std::pow(2, 2*a*a))/sv[i]) << std::endl;
         }
         std::cout << std::endl;
-
-        imnln::printd("End gaussian resampling inv");
         return 0;
     }
 
