@@ -7,6 +7,9 @@
 #include <cmath>
 #include <climits>
 #include <bitset>
+#include <chrono>
+#include <iostream>
+#include <fstream>
 
 #include "parameters.hpp"
 
@@ -18,8 +21,8 @@
 #define DEBUG 1
 
 namespace imnln {
-    auto start = std::chrono::high_resolution_clock::now();
-    auto stop = std::chrono::high_resolution_clock::now();
+    auto static start = std::chrono::high_resolution_clock::now();
+    auto static stop = std::chrono::high_resolution_clock::now();
 
     void timer_start() {
         start = std::chrono::high_resolution_clock::now();
