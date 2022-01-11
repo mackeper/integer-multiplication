@@ -28,8 +28,7 @@ namespace imnln {
         uint64_t S;
         std::vector<uint64_t> t;
         std::vector<uint64_t> s;
-    } params;
+    };
 }
 
 #endif // INTEGER_MULTIPLICATION_CONSTANTS
-

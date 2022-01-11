@@ -6,4 +6,3 @@ namespace imnln {
 	typedef std::complex<poly_type> complex_type;
 }
 #endif
-

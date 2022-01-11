@@ -1,31 +1,42 @@
-# Makefile
 # $@ : name on the left side of a : (the rule)
 # $< : first name of the right side of a :
+# $^ : the name of the prerequisite that caused the rule to execute.
 
-CC = g++
-FLAGS = -std=c++17 -fsanitize=undefined \
-		-Wall -Wconversion -Wfatal-errors \
-		-g -pedantic -lgmpxx -lgmp
+APP_NAME = main
+DEBUG_TARGET = debug
+RELEASE_TARGET = release
 
-TARGET = main
-TESTS = $(wildcard test/*.in)
+INC_DIR=include
+CXX=g++
+CXXFLAGS = -I $(INC_DIR) -std=c++17 -Wfatal-errors
 
-all: $(TARGET).out
+OBJ_DIR=obj
+BIN_DIR=bin
+SRC_DIR=src
+LIBS=-lgmpxx -lgmp
 
-$(TARGET).out : $(TARGET).cpp
-	$(CC) $(FLAGS) -o $@ $<
+SOURCES = $(shell find $(SRC_DIR) -name *.cpp)
+_OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,%.o,$(SOURCES))
+OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(_OBJECTS))
 
-run: $(TARGET).out
-	./main.out
+all: clean $(DEBUG_TARGET)
 
+$(DEBUG_TARGET): CXXFLAGS += -g -fsanitize=undefined -Wall -Wconversion -pedantic
+$(DEBUG_TARGET): clean $(BIN_DIR)/$(APP_NAME)
 
-# Tests in /test, donno about PHONY should google it some day...
-.PHONY: clean test
-test: $(TARGET).out
-	@for t in $(TESTS) ; do echo $$t && \
-	./$(TARGET).out < $$t > $${t%.*}.res && \
-	diff -w $${t%.*}.ans $${t%.*}.res || exit 0 ; done
+$(RELEASE_TARGET): CXXFLAGS += -O3
+$(RELEASE_TARGET): clean $(BIN_DIR)/$(APP_NAME)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(@D)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
+
+$(BIN_DIR)/$(APP_NAME): $(OBJECTS)
+	@echo $(SOURCES)
+	@mkdir -p $(@D)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+
+.PHONY: clean
 
 clean:
-	rm -f $(TARGET).out
-	rm -f test/*.res
+	rm -rf $(OBJ_DIR) $(BIN_DIR)
