@@ -18,7 +18,7 @@ LIBS=-lgmpxx -lgmp
 SOURCES = $(shell find $(SRC_DIR) -name *.cpp)
 OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SOURCES))
 
-all: clean $(DEBUG_TARGET)
+all: $(DEBUG_TARGET)
 
 $(DEBUG_TARGET): CXXFLAGS += -g -fsanitize=undefined -Wall -Wconversion -pedantic
 $(DEBUG_TARGET): clean $(BIN_DIR)/$(APP_NAME)
