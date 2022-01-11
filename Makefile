@@ -16,8 +16,7 @@ SRC_DIR=src
 LIBS=-lgmpxx -lgmp
 
 SOURCES = $(shell find $(SRC_DIR) -name *.cpp)
-_OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,%.o,$(SOURCES))
-OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(_OBJECTS))
+OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SOURCES))
 
 all: clean $(DEBUG_TARGET)
 
