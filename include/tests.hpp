@@ -1,0 +1,8 @@
+#ifndef INTEGER_MULTIPLICATION_TESTS
+#define INTEGER_MULTIPLICATION_TESTS
+
+namespace imnln {
+    void tests();
+}
+
+#endif // INTEGER_MULTIPLICATION_TESTS

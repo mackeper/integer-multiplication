@@ -1,4 +1,3 @@
-// STDsought
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -25,6 +24,8 @@ bool no_gmp = false;
 int parse_args(int argc, char **argv) {
     char c;
     while ((c = (char)getopt(argc, argv, "ng:")) != -1)
+    {
+        printf("%c", c);
         switch (c) {
             case 'g':
                 {
@@ -63,6 +64,7 @@ int parse_args(int argc, char **argv) {
             default:
                 abort ();
         }
+    }
     return 1;
 }
 
@@ -102,8 +104,11 @@ int run_gmp(std::string is1,
     imnln::write_integer(fgmp, tmp);
     delete tmp;
 
+    printf("SSA:  %s\n", imnln::read_integer(fssa).c_str());
+    printf("GMP:  %s\n", imnln::read_integer(fgmp).c_str());
+    printf("HVDH: %s\n", imnln::read_integer(fhvdh).c_str());
     assert(imnln::compare_integer(fgmp, fssa));
-    // assert(imnln::compare_integer(fgmp, fhvdh));
+    //assert(imnln::compare_integer(fgmp, fhvdh));
     imnln::printd("run_gmp end");
     return 0;
 }
@@ -141,7 +146,7 @@ uint64_t find_prime_under(uint64_t ub, uint64_t offset) {
     return 0;
 }
 
-int get_parameters(std::string fname1, std::string fname2) {
+imnln::parameters get_parameters(std::string fname1, std::string fname2) {
     // Read integers from file
     std::string is1 = imnln::read_integer(imnln::INTEGER_FILE_1);
     std::string is2 = imnln::read_integer(imnln::INTEGER_FILE_2);
@@ -178,15 +183,16 @@ int get_parameters(std::string fname1, std::string fname2) {
     }
 
     // Set params struct
-    imnln::params.d = d;
-    imnln::params.n = n;
-    imnln::params.p = p;
-    imnln::params.alpha = a;
-    imnln::params.gamma = g;
-    imnln::params.T = T;
-    imnln::params.S = S;
-    imnln::params.s = s;
-    imnln::params.t = t;
+    imnln::parameters params;
+    params.d = d;
+    params.n = n;
+    params.p = p;
+    params.alpha = a;
+    params.gamma = g;
+    params.T = T;
+    params.S = S;
+    params.s = s;
+    params.t = t;
 
     printf("Parameters:\n"
             "\td = %" PRIu64 "\n"
@@ -210,7 +216,7 @@ int get_parameters(std::string fname1, std::string fname2) {
     is1.erase();
     is2.erase();
 
-    return 1;
+    return params;
 }
 
 int main (int argc, char **argv) {
@@ -219,34 +225,34 @@ int main (int argc, char **argv) {
 
     srand(0);
 
-    get_parameters(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2);
+    auto params = get_parameters(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2);
 
     printf("Run multiplications:\n");
 
     // Run SSA-ish
-    // imnln::timer_start();
-    // int ssa_res = imnln::SSA(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2, imnln::SSA_OUT_FILE);
-    // imnln::timer_stop("ssa:\t");
+     imnln::timer_start();
+     imnln::SSA(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2, imnln::SSA_OUT_FILE);
+     imnln::timer_stop("ssa:\t");
     
     imnln::print_ram_info();
 
     // Run harvey_van_der_hoeven
     imnln::timer_start();
-    int hvdh_res = imnln::HVDH(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2, imnln::HVDH_OUT_FILE);
+    imnln::HVDH(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2, imnln::HVDH_OUT_FILE, params);
     imnln::timer_stop("hvdh:\t");
 
     imnln::print_ram_info();
 
     // Compare to gmp (this need lots of ram!)
-    // if (!no_gmp) {
-    //     imnln::timer_start();
-    //     run_gmp(imnln::INTEGER_FILE_1,
-    //             imnln::INTEGER_FILE_2,
-    //             imnln::GMP_OUT_FILE,
-    //             imnln::SSA_OUT_FILE,
-    //             imnln::HVDH_OUT_FILE);
-    //     imnln::timer_stop("gmp:\t");
-    // }
+     if (!no_gmp) {
+         imnln::timer_start();
+         run_gmp(imnln::INTEGER_FILE_1,
+                 imnln::INTEGER_FILE_2,
+                 imnln::GMP_OUT_FILE,
+                 imnln::SSA_OUT_FILE,
+                 imnln::HVDH_OUT_FILE);
+         imnln::timer_stop("gmp:\t");
+     }
 
     return 0;
 }
