@@ -6,14 +6,14 @@ APP_NAME = main
 DEBUG_TARGET = debug
 RELEASE_TARGET = release
 
-INC_DIR=include
-CXX=g++
+INC_DIR = include
+CXX = g++
 CXXFLAGS = -I $(INC_DIR) -std=c++17 -Wfatal-errors
 
-OBJ_DIR=obj
-BIN_DIR=bin
-SRC_DIR=src
-LIBS=-lgmpxx -lgmp
+OBJ_DIR = obj
+BIN_DIR = bin
+SRC_DIR = src
+LIBS = -lgmpxx -lgmp
 
 SOURCES = $(shell find $(SRC_DIR) -name *.cpp)
 OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SOURCES))
