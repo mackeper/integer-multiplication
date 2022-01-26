@@ -53,7 +53,8 @@ namespace imnln {
     std::vector<complex_type> gaussian_resampling_B(const std::vector<complex_type> &u,
             size_t s, size_t t, size_t a, size_t p);
 
-    int gaussian_resampling(HVDHPolynomial &pv);
+    int gaussian_resampling(HVDHPolynomial &pv,
+            size_t s, size_t t, size_t a, size_t p);
 
     /**
      * Given two intergers (as string) multiply them

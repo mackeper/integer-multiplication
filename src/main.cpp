@@ -15,7 +15,6 @@
 
 // Local
 #include "util.hpp"
-#include "tests.hpp"
 #include "parameters.hpp"
 #include "polynomial_multiplication.hpp"
 #include "harvey_van_der_hoeven.hpp"
@@ -220,7 +219,6 @@ imnln::parameters get_parameters(std::string fname1, std::string fname2) {
 }
 
 int main (int argc, char **argv) {
-    // imnln::tests();
     parse_args(argc, argv);
 
     srand(0);

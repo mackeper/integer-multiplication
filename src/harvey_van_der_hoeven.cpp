@@ -62,8 +62,8 @@ std::vector<imnln::complex_type> imnln::gaussian_resampling_S(const std::vector<
         int jstart = (int)std::ceil(-(imnln::poly_type)m+((imnln::poly_type)s*(imnln::poly_type)k)/(imnln::poly_type)t);
         int jend   = (int)std::floor((imnln::poly_type)m+((imnln::poly_type)s*(imnln::poly_type)k)/(imnln::poly_type)t);
         for (int j = jstart; j <= jend; j++) {
-            // imnln::complex_type b = ((imnln::poly_type)1/(imnln::poly_type)2) * ((imnln::poly_type)1/(imnln::poly_type)a);
-            imnln::complex_type b = ((imnln::poly_type)1/(imnln::poly_type)a);
+            imnln::complex_type b = ((imnln::poly_type)1/(imnln::poly_type)2) * ((imnln::poly_type)1/(imnln::poly_type)a);
+            //imnln::complex_type b = ((imnln::poly_type)1/(imnln::poly_type)a);
             imnln::complex_type x = -M_PI * std::pow((imnln::poly_type)a, -2);
             x *= std::pow((imnln::poly_type)(j - ((imnln::poly_type)s * (imnln::poly_type)k)/(imnln::poly_type)t), 2);
             x = std::exp(x);
@@ -76,13 +76,13 @@ std::vector<imnln::complex_type> imnln::gaussian_resampling_S(const std::vector<
         }
     }
 
-    // std::cout << std::scientific;
-    // std::cout << std::setprecision(4);
-    // for (auto outer : mat) {
-    //     for (auto inner : outer)
-    //         std::cout << inner << " ";
-    //     std::cout << std::endl;
-    // }
+    std::cout << std::scientific;
+    std::cout << std::setprecision(4);
+    for (auto outer : mat) {
+        for (auto inner : outer)
+            std::cout << inner << " ";
+        std::cout << std::endl;
+    }
     return tv;
 }
 
@@ -241,7 +241,8 @@ std::vector<imnln::complex_type> imnln::gaussian_resampling_B(const std::vector<
     return ub;
 }
 
-int imnln::gaussian_resampling(HVDHPolynomial &pv) {
+int imnln::gaussian_resampling(HVDHPolynomial &pv,
+        size_t s, size_t t, size_t a, size_t p) {
     std::cout << std::setprecision(5);
     std::cout << std::fixed;
     imnln::printd("Start gaussian resampling");
@@ -250,10 +251,10 @@ int imnln::gaussian_resampling(HVDHPolynomial &pv) {
     // imnln::poly_type s = (imnln::poly_type)imnln::params.s.size();
     // imnln::poly_type t = (imnln::poly_type)imnln::params.t.size();
     
-    size_t s = 10;
-    size_t t = 13;
-    size_t a = 2;
-    size_t p = 10;
+    s = 10;
+    t = 13;
+    a = 2;
+    p = 100;
     assert((imnln::poly_type)t/(imnln::poly_type)s - 1.0 > 1.0/((imnln::poly_type)a*(imnln::poly_type) a));
 
     // std::vector<imnln::poly_type> rsv = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
@@ -334,7 +335,7 @@ int imnln::HVDH(std::string fname1, std::string fname2, std::string fout, imnln:
         }
         p1.vec_to_poly(v1);
     }
-    gaussian_resampling(p1);
+    gaussian_resampling(p1, params.S, params.T, params.alpha, params.p);
 
     // Get second polynomial
     HVDHPolynomial p2;
