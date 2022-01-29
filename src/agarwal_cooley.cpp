@@ -17,7 +17,7 @@ int imnln::agarwal_cooley(std::vector<poly_type> &v, parameters params) {
 	std::vector<uint64_t> v2 = {0, 1, 2, 3, 4, 4, 6, 7, 8, 9};
 	std::vector<uint64_t> invs(s.size());
 	for (uint64_t i = 0; i < s.size(); i++) {
-		invs[i] = imnln::modInverse(t[i], s[i]);
+		invs[i] = imnln::mod_inverse(t[i], s[i]);
 		std::cout << "invs: " << invs[i] << std::endl;
 	}
 

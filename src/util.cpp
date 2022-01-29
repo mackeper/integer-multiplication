@@ -17,8 +17,6 @@
 #include "parameters.hpp"
 #include "util.hpp"
 
-#define DEBUG 1
-
 auto static start = std::chrono::high_resolution_clock::now();
 auto static stop = std::chrono::high_resolution_clock::now();
 
@@ -26,30 +24,32 @@ void imnln::timer_start() {
     start = std::chrono::high_resolution_clock::now();
 }
 
-void imnln::timer_stop(std::string text) {
+void imnln::timer_stop(const std::string text) {
     stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     std::cout << "\ttimer: " << text << duration.count() << std::endl;
 
 }
 
-void imnln::printd(std::string s) {
+void imnln::printd(const std::string s) {
+    #ifndef DEBUG
+    #define DEBUG false
+    #endif
     if (DEBUG)
         std::cout << s <<std::endl;
 }
 
-void imnln::generate_integer(std::string fname, size_t length) {
-    printd("generate_integer " + fname + " start");
+void imnln::generate_integer(const std::string fname, const size_t length, const int seed /*= 0*/) {
+    srand(seed);
     std::ofstream f;
     f.open(fname);
     for (size_t i = 0; i < length; i++) {
         f << std::to_string(rand()%10);
     }
     f.close();
-    printd("generate_integer " + fname + " end");
 }
 
-std::string imnln::read_integer(std::string fname) {
+std::string imnln::read_integer(const std::string fname) {
     //printd("read_integer " + fname + " start");
     std::string in_int;
     std::ifstream f(fname);
@@ -64,13 +64,13 @@ std::string imnln::read_integer(std::string fname) {
     return in_int;
 }
 
-bool imnln::compare_integer(std::string fname1, std::string fname2) {
+bool imnln::compare_integer(const std::string fname1, const std::string fname2) {
     std::string tmp1 = read_integer(fname1);
     std::string tmp2 = read_integer(fname2);
     return tmp1.compare(tmp2) == 0;
 }
 
-int imnln::write_integer(std::string fname,  poly_type* value, size_t len) {
+int imnln::write_integer(const std::string fname, const poly_type* value, const size_t len, const size_t chuck_size) {
     //printd("write_integer " + fname + " start");
 
     std::ofstream f;
@@ -79,7 +79,7 @@ int imnln::write_integer(std::string fname,  poly_type* value, size_t len) {
         uint64_t v = (uint64_t)std::round(value[i]);
         std::string prs = std::to_string(v);
         if (i != 0)
-            prs = std::string(imnln::CHUCK_SIZE - prs.length(), '0') + prs;
+            prs = std::string(chuck_size - prs.length(), '0') + prs;
         f << prs;
     }
     f.close();
@@ -88,7 +88,7 @@ int imnln::write_integer(std::string fname,  poly_type* value, size_t len) {
     return 0;
 }
 
-int imnln::write_integer(std::string fname,  char * value) {
+int imnln::write_integer(const std::string fname, const char * value) {
     //printd("write_integer " + fname + " start");
 
     std::ofstream f;
@@ -101,7 +101,7 @@ int imnln::write_integer(std::string fname,  char * value) {
 }
 
 
-imnln::poly_type imnln::str_to_num(std::string &istr) {
+imnln::poly_type imnln::str_to_num(const std::string &istr) {
     imnln::poly_type i = 0;
 
     for (char c : istr) {
@@ -111,14 +111,14 @@ imnln::poly_type imnln::str_to_num(std::string &istr) {
     return i;
 }
 
-std::vector<imnln::poly_type> imnln::split(std::string &istr) {
+std::vector<imnln::poly_type> imnln::split(const std::string &istr, const size_t chuck_size) {
     //printd("split start");
     std::vector<imnln::poly_type> v;
     size_t i = 0;
-    size_t j = (imnln::CHUCK_SIZE - istr.size() % imnln::CHUCK_SIZE) % imnln::CHUCK_SIZE;
+    size_t j = (chuck_size - istr.size() % chuck_size) % chuck_size;
     std::string tmp_str = "";
     while(i < istr.size()) {
-        if (j == imnln::CHUCK_SIZE) {
+        if (j == chuck_size) {
             v.push_back(str_to_num(tmp_str)); 
             tmp_str = "";
             j = 0;
@@ -138,7 +138,7 @@ std::vector<imnln::poly_type> imnln::split(std::string &istr) {
     return v;
 }
 
-std::string imnln::concat(std::vector<poly_type> &v) {
+std::string imnln::concat(const std::vector<poly_type> &v) {
     std::string is = "";
     for(auto it = v.begin(); it != v.end(); it++) {
         std::string cs = "";
@@ -172,10 +172,9 @@ void imnln::print_ram_info(){
 
 // Non-square matrix transpose of matrix of size r x c and base address A 
 // https://www.geeksforgeeks.org/inplace-m-x-n-size-matrix-transpose/
-template <class T>
-void imnln::transpose(std::vector<T> &v, int r, int c) { 
+void imnln::transpose(std::vector<imnln::poly_type> &v, const int r, const int c) { 
     int size = r*c - 1; 
-    int t; // holds element to be replaced, eventually becomes next element to move 
+    poly_type t; // holds element to be replaced, eventually becomes next element to move 
     int next; // location of 't' to be moved 
     int cycleBegin; // holds start of cycle 
     int i; // iterator 
@@ -205,10 +204,11 @@ void imnln::transpose(std::vector<T> &v, int r, int c) {
 
 // https://www.geeksforgeeks.org/multiplicative-inverse-under-modulo-m/
 // Inverse of a modulo m
-uint64_t imnln::modInverse(uint64_t a, uint64_t m) { 
-    a = a%m; 
+uint64_t imnln::mod_inverse(const uint64_t a, const uint64_t m) { 
+    u_int64_t a2 = a;
+    a2 = a2%m; 
     for (uint64_t x = 1; x<m; x++) { 
-        if ((a*x) % m == 1) {
+        if ((a2*x) % m == 1) {
             return x; 
         }
     }

@@ -191,7 +191,7 @@ namespace imnln {
             {
                 std::string istr1;
                 istr1 = imnln::read_integer(imnln::INTEGER_FILE_1);
-                v1 = imnln::split(istr1);
+                v1 = imnln::split(istr1, imnln::CHUCK_SIZE);
                 istr1.erase(istr1.begin(), istr1.end());
             }
             p1.vec_to_poly(v1);
@@ -204,7 +204,7 @@ namespace imnln {
             {
                 std::string istr2;
                 istr2 = imnln::read_integer(imnln::INTEGER_FILE_2);
-                v2 = imnln::split(istr2);
+                v2 = imnln::split(istr2, imnln::CHUCK_SIZE);
                 istr2.erase(istr2.begin(), istr2.end());
             }
             p2.vec_to_poly(v2);
@@ -228,7 +228,7 @@ namespace imnln {
         }
 
         // Build result string
-        imnln::write_integer(fout, pr.get_coeffs(), pr_len);
+        imnln::write_integer(fout, pr.get_coeffs(), pr_len, imnln::CHUCK_SIZE);
 
         return 0;
     }
