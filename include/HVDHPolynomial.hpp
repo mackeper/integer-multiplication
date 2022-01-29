@@ -18,6 +18,7 @@ namespace imnln {
         HVDHPolynomial();
         explicit HVDHPolynomial(size_t size);
         explicit HVDHPolynomial(std::vector<poly_type> &v);
+        HVDHPolynomial(const HVDHPolynomial &p);
         HVDHPolynomial(HVDHPolynomial &&p);
         ~HVDHPolynomial();
 

@@ -46,7 +46,11 @@ namespace imnln {
         }
 
         public:
-        Polynomial() {}
+        Polynomial() {
+            coeffs_ = new T[0];
+            size_ = 0;
+            deleted = false;
+        }
 
         explicit Polynomial(size_t size) {
             coeffs_ = new T[size];
