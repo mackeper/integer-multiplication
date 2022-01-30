@@ -29,6 +29,10 @@ namespace imnln {
         std::vector<uint64_t> t;
         std::vector<uint64_t> s;
     };
+    parameters get_parameters(const std::string fname1, const std::string fname2);
+    uint64_t unique_power_of_two(const uint64_t lb, const uint64_t ub);
+    bool is_prime(const uint64_t p);
+    uint64_t find_prime_under(const uint64_t ub, uint64_t offset);
 }
 
 #endif // INTEGER_MULTIPLICATION_CONSTANTS
