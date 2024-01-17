@@ -33,5 +33,5 @@ namespace imnln {
     uint64_t mod_inverse(const uint64_t a, const uint64_t m);
 }
 
-#endif // INTEGER_MULTIPLICATION_UTIL
+#endif
 

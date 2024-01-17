@@ -3,6 +3,7 @@
 #include <cassert>
 #include "util.hpp"
 #include "parameters.hpp"
+#include <iostream>
 
 // Change to bin search
 uint64_t imnln::unique_power_of_two(const uint64_t lb, const uint64_t ub) {
@@ -16,7 +17,9 @@ uint64_t imnln::unique_power_of_two(const uint64_t lb, const uint64_t ub) {
 
 bool imnln::is_prime(const uint64_t p) {
     if (p < 2) return false;
-    for (uint64_t i = 2; i < p; i++) {
+    if (p == 2) return true;
+    if ((p & 1) == 0) return false;
+    for (uint64_t i = 3; i < p; i+=2) {
         if (p % i == 0) {
             return false;
         }
@@ -38,25 +41,22 @@ uint64_t imnln::find_prime_under(const uint64_t ub, const uint64_t offset) {
     return 0;
 }
 
-imnln::parameters imnln::get_parameters(const std::string fname1, const std::string fname2) {
+imnln::parameters imnln::get_parameters(const std::string fname1, const std::string fname2, const bool output /* = false*/) {
     // Read integers from file
-    //std::string is1 = imnln::read_integer(fname1);
-    //std::string is2 = imnln::read_integer(fname2);
-    std::string is1 = imnln::read_integer(imnln::INTEGER_FILE_1);
-    std::string is2 = imnln::read_integer(imnln::INTEGER_FILE_2);
+    std::string is1 = imnln::read_integer(fname1);
+    std::string is2 = imnln::read_integer(fname2);
 
     // Select parameters
-    uint64_t d = 4;
+    uint64_t d = 2; // d >= 2
     uint64_t n = 4*std::max(is1.size(), is2.size()); // size of integers
     uint64_t b = (uint64_t)std::ceil(std::log2(n)); // chuck size
     uint64_t p = 6*b; // precision
-    // uint64_t a = (uint64_t)std::ceil(std::pow(12*d*d*b, 1/4)); // alpha
     uint64_t a = (uint64_t)std::ceil(std::pow(12*d*d*b, (double)1/4)); // alpha
     uint64_t g = 2*d*a*a; // gamma
     uint64_t T = unique_power_of_two(4*n/b, 8*n/b);
     uint64_t r = unique_power_of_two(
-            (uint64_t)std::pow(T, (double)1/(double)d),
-            2*(uint64_t)std::pow(T, (double)1/(double)d));
+            (uint64_t)std::round(std::pow(T, (double)1/(double)d)),
+            2*(uint64_t)std::round(std::pow(T, (double)1/(double)d)));
     uint64_t dp = (uint64_t)std::log2(std::pow(r, d)/(double)T);
     std::vector<uint64_t> t(d, r/2); // t
     std::for_each(t.begin()+dp, t.end(), [](uint64_t &i) {i <<= 1;});
@@ -70,6 +70,8 @@ imnln::parameters imnln::get_parameters(const std::string fname1, const std::str
     }
     uint64_t S = 1;
     std::for_each(s.begin(), s.end(), [&S](uint64_t &i) {S *= i;});
+
+    // Assert some correctness
     std::vector<double> o(d); // omegas
     for (uint64_t i = 0; i < o.size(); i++) {
         o[i] = (double)t[i] / (double)s[i]- 1;
@@ -80,33 +82,38 @@ imnln::parameters imnln::get_parameters(const std::string fname1, const std::str
     imnln::parameters params;
     params.d = d;
     params.n = n;
+    params.b = b;
     params.p = p;
     params.alpha = a;
     params.gamma = g;
     params.T = T;
+    params.r = r;
     params.S = S;
     params.s = s;
     params.t = t;
 
-    printf("Parameters:\n"
-            "\td = %" PRIu64 "\n"
-            "\tn = %" PRIu64 "\n"
-            "\tb = %" PRIu64 "\n"
-            "\tp = %" PRIu64 "\n"
-            "\ta = %" PRIu64 "\n"
-            "\tg = %" PRIu64 "\n"
-            "\tT = %" PRIu64 "\n"
-            "\tr = %" PRIu64 "\n"
-            "\tdp = %" PRIu64 "\n"
-            "\tS = %" PRIu64 "\n"
-            , d, n, b, p, a, g, T, r, dp, S);
-    printf("\n");
-    std::for_each(t.begin(), t.end(), [](uint64_t &i) {printf("\tt = %" PRIu64"\n", i);});
-    printf("\n");
-    std::for_each(s.begin(), s.end(), [](uint64_t &i) {printf("\ts = %" PRIu64"\n", i);});
-    printf("\n");
-    std::for_each(o.begin(), o.end(), [](double &i) {printf("\to = %lf\n", i);});
-
+    if (output)
+    {
+        printf("Parameters:\n"
+                "\td = %" PRIu64 "\n"
+                "\tn = %" PRIu64 "\n"
+                "\tb = %" PRIu64 "\n"
+                "\tp = %" PRIu64 "\n"
+                "\ta = %" PRIu64 "\n"
+                "\tg = %" PRIu64 "\n"
+                "\tT = %" PRIu64 "\n"
+                "\tr = %" PRIu64 "\n"
+                "\tdp = %" PRIu64 "\n"
+                "\tS = %" PRIu64 "\n"
+                , d, n, b, p, a, g, T, r, dp, S);
+        printf("\n");
+        std::for_each(t.begin(), t.end(), [](uint64_t &i) { printf("\tt = %" PRIu64"\n", i); });
+        printf("\n");
+        std::for_each(s.begin(), s.end(), [](uint64_t &i) { printf("\ts = %" PRIu64"\n", i); });
+        printf("\n");
+        std::for_each(o.begin(), o.end(), [](double &i) { printf("\to = %lf\n", i); });
+    }
+    
     is1.erase();
     is2.erase();
 

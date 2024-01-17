@@ -10,10 +10,9 @@
 #include <unistd.h>
 #include <chrono>
 
-// GMP
 #include <gmp.h>
 
-// Local
+#include "constants.hpp"
 #include "util.hpp"
 #include "parameters.hpp"
 #include "polynomial_multiplication.hpp"
@@ -67,8 +66,8 @@ int parse_args(int argc, char **argv) {
     return 1;
 }
 
-int run_gmp(std::string is1,
-        std::string is2,
+int run_gmp(std::string fname1,
+        std::string fname2,
         std::string fgmp,
         std::string fssa,
         std::string fhvdh) {
@@ -84,12 +83,12 @@ int run_gmp(std::string is1,
     mpz_init(gmp_res);
     
     {
-        std::string is1 = imnln::read_integer(imnln::INTEGER_FILE_1);
+        std::string is1 = imnln::read_integer(fname1);
         flag = mpz_set_str(gmp_i1, is1.c_str(), 10);
     }
     assert (flag == 0); 
     {
-        std::string is2 = imnln::read_integer(imnln::INTEGER_FILE_2);
+        std::string is2 = imnln::read_integer(fname2);
         flag = mpz_set_str(gmp_i2, is2.c_str(), 10);
     }
     assert (flag == 0); 
@@ -107,7 +106,7 @@ int run_gmp(std::string is1,
     printf("GMP:  %s\n", imnln::read_integer(fgmp).c_str());
     printf("HVDH: %s\n", imnln::read_integer(fhvdh).c_str());
     assert(imnln::compare_integer(fgmp, fssa));
-    //assert(imnln::compare_integer(fgmp, fhvdh));
+    assert(imnln::compare_integer(fgmp, fhvdh));
     imnln::printd("run_gmp end");
     return 0;
 }
@@ -123,7 +122,7 @@ int main (int argc, char **argv) {
 
     // Run SSA-ish
      imnln::timer_start();
-     imnln::SSA(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2, imnln::SSA_OUT_FILE);
+     imnln::SSA(imnln::INTEGER_FILE_1, imnln::INTEGER_FILE_2, imnln::SSA_OUT_FILE, imnln::CHUCK_SIZE, imnln::EPSILON);
      imnln::timer_stop("ssa:\t");
     
     imnln::print_ram_info();

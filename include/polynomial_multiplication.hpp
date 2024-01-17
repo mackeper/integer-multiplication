@@ -186,7 +186,7 @@ namespace imnln {
      * Given two intergers (as string) multiply them
      * using Schönhage-Strassen
      */
-    int SSA(std::string fname1, std::string fname2, std::string fout) {
+    int SSA(const std::string fname1, const std::string fname2, const std::string fout, const uint64_t chuck_size, const uint64_t epsilon) {
 
         // Get first polynomial
         Polynomial<poly_type> p1;
@@ -194,8 +194,8 @@ namespace imnln {
             std::vector<poly_type> v1;
             {
                 std::string istr1;
-                istr1 = imnln::read_integer(imnln::INTEGER_FILE_1);
-                v1 = imnln::split(istr1, imnln::CHUCK_SIZE);
+                istr1 = imnln::read_integer(fname1);
+                v1 = imnln::split(istr1, chuck_size);
                 istr1.erase(istr1.begin(), istr1.end());
             }
             p1.vec_to_poly(v1);
@@ -207,8 +207,8 @@ namespace imnln {
             std::vector<poly_type> v2;
             {
                 std::string istr2;
-                istr2 = imnln::read_integer(imnln::INTEGER_FILE_2);
-                v2 = imnln::split(istr2, imnln::CHUCK_SIZE);
+                istr2 = imnln::read_integer(fname2);
+                v2 = imnln::split(istr2, chuck_size);
                 istr2.erase(istr2.begin(), istr2.end());
             }
             p2.vec_to_poly(v2);
@@ -220,11 +220,11 @@ namespace imnln {
 
         // trim 0 coeffients at beginning
         size_t pr_len = pr.size()-1;
-        while(pr_len > 0 && std::abs(std::round(pr[pr_len])) < imnln::EPSILON) {
+        while(pr_len > 0 && std::abs(std::round(pr[pr_len])) < epsilon) {
             pr_len--;
         }
         // perform carrying
-        uint64_t mod = std::pow(10, imnln::CHUCK_SIZE);
+        uint64_t mod = (uint64_t)std::pow(10, chuck_size);
         for (size_t i = pr_len; i > 0 && i < ULLONG_MAX; i--) {
             uint64_t v = (uint64_t)std::round(pr[i]);
             pr[i-1] += (poly_type)(v / mod); // carry
@@ -232,7 +232,7 @@ namespace imnln {
         }
 
         // Build result string
-        imnln::write_integer(fout, pr.get_coeffs(), pr_len, imnln::CHUCK_SIZE);
+        imnln::write_integer(fout, pr.get_coeffs(), pr_len, chuck_size);
 
         return 0;
     }

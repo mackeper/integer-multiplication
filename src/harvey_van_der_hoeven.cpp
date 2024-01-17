@@ -10,6 +10,7 @@
 #include <complex>
 #include <iomanip>
 #include <iostream>
+#include "constants.hpp"
 #include "types.hpp"
 #include "parameters.hpp"
 #include "util.hpp"
@@ -62,7 +63,7 @@ int imnln::HVDH(std::string fname1, std::string fname2, std::string fout, imnln:
         std::vector<imnln::poly_type> v1;
         {
             std::string istr1;
-            istr1 = imnln::read_integer(imnln::INTEGER_FILE_1);
+            istr1 = imnln::read_integer(fname1);
             v1 = imnln::split(istr1, imnln::CHUCK_SIZE);
             printd("Degree: " + std::to_string(v1.size()) + " S: " 
                     + std::to_string(params.S));
@@ -80,7 +81,7 @@ int imnln::HVDH(std::string fname1, std::string fname2, std::string fout, imnln:
         std::vector<imnln::poly_type> v2;
         {
             std::string istr2;
-            istr2 = imnln::read_integer(imnln::INTEGER_FILE_2);
+            istr2 = imnln::read_integer(fname2);
             v2 = imnln::split(istr2, imnln::CHUCK_SIZE);
             istr2.erase(istr2.begin(), istr2.end());
         }
